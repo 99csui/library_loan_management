@@ -44,6 +44,6 @@ class TestMember(unittest.TestCase):
     def test_member_string_representation(self) -> None:
         member = Member(1, "Harry Valen")
         expected = ("Member ID: 1\n"
-                           "Name: Harry Valen\n")
+                           "Name: Harry Valen")
 
         self.assertEqual(str(member), expected)
