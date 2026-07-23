@@ -26,4 +26,11 @@ class MemberRepository:
     def list_all(self) -> list[Member]:
         return self._members.copy()
             
+    def remove(self, member_id: int) -> bool:
+        member = self.get_by_id(member_id)
 
+        if member is None:
+            return False
+        
+        self._members.remove(member)
+        return True

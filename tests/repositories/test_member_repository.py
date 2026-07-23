@@ -95,3 +95,49 @@ class TestMemberRepository(unittest.TestCase):
         result = self.repository.list_all()
 
         self.assertEqual(result, [member1, member2])
+
+
+    def test_remove_returns_true_when_member_is_removed(self):
+            member1 = Member(1, "Harry Leving")
+            member2 = Member(2, "Francisca Osorio")
+            self.repository.add(member1)
+            self.repository.add(member2)
+
+            result = self.repository.remove(member1.id)
+
+            self.assertTrue(result)
+            self.assertIsNone(self.repository.get_by_id(member1.id))
+
+    def test_remove_returns_false_when_member_does_not_exist(self):
+        member1 = Member(1, "Harry Leving")
+        member2 = Member(2, "Francisca Osorio")
+        self.repository.add(member1)
+        self.repository.add(member2)
+
+        result = self.repository.remove(4)
+
+        self.assertFalse(result)
+
+    def test_remove_does_not_remove_other_members(self):
+        member1 = Member(1, "Harry Leving")
+        member2 = Member(2, "Francisca Osorio")
+        self.repository.add(member1)
+        self.repository.add(member2)
+        
+        self.repository.remove(member1.id)
+        result = self.repository.list_all()
+
+        self.assertEqual(result, [member2])
+
+    def test_remove_keeps_remaining_members_in_insertion_order(self):
+        member1 = Member(1, "Harry Leving")
+        member2 = Member(2, "Francisca Osorio")
+        member3 = Member(3, "Ignacio Fuentes")
+        self.repository.add(member1)
+        self.repository.add(member2)
+        self.repository.add(member3)
+
+        self.repository.remove(member2.id)
+        result = self.repository.list_all()
+
+        self.assertEqual(result, [member1, member3])
