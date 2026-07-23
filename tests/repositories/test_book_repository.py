@@ -36,3 +36,22 @@ class TestBookRepository(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.repository.add(book2)
 
+
+    def test_exists_returns_true_when_book_exists(self):
+        book = Book(1, "Clean Code", "Robert C. Martin")
+        self.repository.add(book)
+        result = self.repository.exists(book.id)
+
+        self.assertTrue(result)
+
+    def test_exists_returns_false_when_book_not_exist(self):
+        book = Book(1, "Clean Code", "Robert C. Martin")
+        self.repository.add(book)
+        result = self.repository.exists(2)
+
+        self.assertFalse(result)
+    
+    def test_exists_returns_false_when_repository_is_empty(self):
+        result = self.repository.exists(1)
+
+        self.assertFalse(result)

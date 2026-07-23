@@ -21,3 +21,6 @@ class BookRepository:
                 return book
         return None
         
+
+    def exists(self, book_id: int) -> bool:
+        return self.get_by_id(book_id) is not None
