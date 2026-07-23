@@ -56,3 +56,42 @@ class TestMemberRepository(unittest.TestCase):
         result = self.repository.exists(1)
 
         self.assertFalse(result)
+
+
+    def test_list_all_returns_empty_list_when_repository_is_empty(self):
+        result = self.repository.list_all()
+
+        self.assertEqual(result,[])
+
+    def test_list_all_returns_all_stored_members(self):
+        member1 = Member(1, "Harry Leving")
+        member2 = Member(2, "Francisca Osorio")
+        self.repository.add(member1)
+        self.repository.add(member2)
+
+        result = self.repository.list_all()
+        self.assertEqual(result, [member1, member2])
+
+    def test_list_all_keeps_insertion_order(self):
+        member1 = Member(1, "Harry Leving")
+        member2 = Member(2, "Francisca Osorio")
+        self.repository.add(member1)
+        self.repository.add(member2)
+
+        result = self.repository.list_all()
+
+        self.assertIs(result[0], member1)
+        self.assertIs(result[1], member2)
+
+    def test_list_all_modifying_returned_list_does_not_modify_repository(self):
+        member1 = Member(1, "Harry Leving")
+        member2 = Member(2, "Francisca Osorio")
+        self.repository.add(member1)
+        self.repository.add(member2)
+
+        modified_list = self.repository.list_all()
+        modified_list.clear()
+
+        result = self.repository.list_all()
+
+        self.assertEqual(result, [member1, member2])

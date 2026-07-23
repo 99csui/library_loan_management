@@ -23,4 +23,7 @@ class MemberRepository:
     def exists(self, member_id: int) -> bool:
         return self.get_by_id(member_id) is not None
         
+    def list_all(self) -> list[Member]:
+        return self._members.copy()
+            
 
