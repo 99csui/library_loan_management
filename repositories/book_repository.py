@@ -25,3 +25,12 @@ class BookRepository:
 
     def list_all(self) -> list[Book]:
         return self._books.copy()
+    
+    def remove(self, book_id: int) -> bool:
+        book = self.get_by_id(book_id)
+
+        if book is None:
+            return False
+        
+        self._books.remove(book)
+        return True

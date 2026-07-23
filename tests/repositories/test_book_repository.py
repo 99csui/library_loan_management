@@ -94,3 +94,50 @@ class TestBookRepository(unittest.TestCase):
         result = self.repository.list_all()
 
         self.assertEqual(result, [book1, book2])
+
+
+    def test_remove_returns_true_when_book_is_removed(self):
+        book1 = Book(1, "Clean Code", "Robert C. Martin")
+        book2 = Book(2, "Python Crash Course", "Eric Matthes")
+        self.repository.add(book1)
+        self.repository.add(book2)
+
+        result = self.repository.remove(book1.id)
+
+        self.assertTrue(result)
+        self.assertIsNone(self.repository.get_by_id(book1.id))
+
+    def test_remove_returns_false_when_book_does_not_exist(self):
+        book1 = Book(1, "Clean Code", "Robert C. Martin")
+        book2 = Book(2, "Python Crash Course", "Eric Matthes")
+        self.repository.add(book1)
+        self.repository.add(book2)
+
+        result = self.repository.remove(4)
+
+        self.assertFalse(result)
+
+    def test_remove_does_not_remove_other_books(self):
+        book1 = Book(1, "Clean Code", "Robert C. Martin")
+        book2 = Book(2, "Python Crash Course", "Eric Matthes")
+        self.repository.add(book1)
+        self.repository.add(book2)
+        
+        self.repository.remove(book1.id)
+        result = self.repository.list_all()
+
+        self.assertEqual(result, [book2])
+
+    def test_remove_keeps_remaining_books_in_insertion_order(self):
+        book1 = Book(1, "Clean Code", "Robert C. Martin")
+        book2 = Book(2, "Python Crash Course", "Eric Matthes")
+        book3 = Book(3, "Fundamentals of Software Architecture: An Engineering Approach", "Mark Richards and Neal Ford")
+        self.repository.add(book1)
+        self.repository.add(book2)
+        self.repository.add(book3)
+
+        self.repository.remove(book2.id)
+        result = self.repository.list_all()
+
+        self.assertEqual(result, [book1, book3])
+
