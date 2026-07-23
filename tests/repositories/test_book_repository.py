@@ -55,3 +55,42 @@ class TestBookRepository(unittest.TestCase):
         result = self.repository.exists(1)
 
         self.assertFalse(result)
+
+
+    def test_list_all_returns_empty_list_when_repository_is_empty(self):
+        result = self.repository.list_all()
+
+        self.assertEqual(result,[])
+
+    def test_list_all_returns_all_stored_books(self):
+        book1 = Book(1, "Clean Code", "Robert C. Martin")
+        book2 = Book(2, "Python Crash Course", "Eric Matthes")
+        self.repository.add(book1)
+        self.repository.add(book2)
+
+        result = self.repository.list_all()
+        self.assertEqual(result, [book1, book2])
+
+    def test_list_all_keeps_insertion_order(self):
+        book1 = Book(1, "Clean Code", "Robert C. Martin")
+        book2 = Book(2, "Python Crash Course", "Eric Matthes")
+        self.repository.add(book1)
+        self.repository.add(book2)
+
+        result = self.repository.list_all()
+
+        self.assertIs(result[0],book1)
+        self.assertIs(result[1],book2)
+
+    def test_list_all_modifying_returned_list_does_not_modify_repository(self):
+        book1 = Book(1, "Clean Code", "Robert C. Martin")
+        book2 = Book(2, "Python Crash Course", "Eric Matthes")
+        self.repository.add(book1)
+        self.repository.add(book2)
+
+        modified_list = self.repository.list_all()
+        modified_list.clear()
+
+        result = self.repository.list_all()
+
+        self.assertEqual(result, [book1, book2])

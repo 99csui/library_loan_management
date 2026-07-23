@@ -14,13 +14,14 @@ class BookRepository:
         
         self._books.append(book)
 
-
     def get_by_id(self, book_id: int) -> Book | None:
         for book in self._books:
             if book.id == book_id:
                 return book
-        return None
-        
+        return None 
 
     def exists(self, book_id: int) -> bool:
         return self.get_by_id(book_id) is not None
+
+    def list_all(self) -> list[Book]:
+        return self._books.copy()
