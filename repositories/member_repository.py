@@ -7,10 +7,10 @@ class MemberRepository:
     
     def add(self, member: Member) -> None:
         if not isinstance(member, Member):
-            raise TypeError("cannot add an object that is not an instance of Book")
+            raise TypeError("cannot add an object that is not an instance of Member")
         
         if self.get_by_id(member.id) is not None:
-            raise ValueError("cannot add a book with a duplicated id")
+            raise ValueError("cannot add a member with a duplicated id")
         
         self._members.append(member)
 
@@ -19,4 +19,8 @@ class MemberRepository:
             if member.id == member_id:
                 return member
         return None 
+
+    def exists(self, member_id: int) -> bool:
+        return self.get_by_id(member_id) is not None
+        
 

@@ -38,3 +38,21 @@ class TestMemberRepository(unittest.TestCase):
             self.repository.add(member2)
 
 
+    def test_exists_returns_true_when_member_exists(self):
+        member = Member(1, "Harry Leving")
+        self.repository.add(member)
+        result = self.repository.exists(member.id)
+
+        self.assertTrue(result)
+
+    def test_exists_returns_false_when_member_not_exist(self):
+        member = Member(1, "Harry Leving")
+        self.repository.add(member)
+        result = self.repository.exists(2)
+
+        self.assertFalse(result)
+    
+    def test_exists_returns_false_when_repository_is_empty(self):
+        result = self.repository.exists(1)
+
+        self.assertFalse(result)
