@@ -30,7 +30,7 @@ class TestMemberRepository(unittest.TestCase):
         with self.assertRaises(TypeError):
             self.repository.add("text")
 
-    def test_add_raises_value_error_when_book_id_already_exists(self):
+    def test_add_raises_value_error_when_member_id_already_exists(self):
         member1 = Member(1, "Harry Leving")
         member2 = Member(1, "Francisca Osorio")
         self.repository.add(member1)
@@ -98,15 +98,15 @@ class TestMemberRepository(unittest.TestCase):
 
 
     def test_remove_returns_true_when_member_is_removed(self):
-            member1 = Member(1, "Harry Leving")
-            member2 = Member(2, "Francisca Osorio")
-            self.repository.add(member1)
-            self.repository.add(member2)
+        member1 = Member(1, "Harry Leving")
+        member2 = Member(2, "Francisca Osorio")
+        self.repository.add(member1)
+        self.repository.add(member2)
 
-            result = self.repository.remove(member1.id)
+        result = self.repository.remove(member1.id)
 
-            self.assertTrue(result)
-            self.assertIsNone(self.repository.get_by_id(member1.id))
+        self.assertTrue(result)
+        self.assertIsNone(self.repository.get_by_id(member1.id))
 
     def test_remove_returns_false_when_member_does_not_exist(self):
         member1 = Member(1, "Harry Leving")
