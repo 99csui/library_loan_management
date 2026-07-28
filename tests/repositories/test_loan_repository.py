@@ -10,6 +10,7 @@ class TestLoanRepository(unittest.TestCase):
     def setUp(self):
         self.repository = LoanRepository()
         self.borrowed_at = datetime(2026, 7, 17, 15, 30)
+        self.returned_at = datetime(2026, 7, 20, 12, 0)
 
 
     def test_new_repository_returns_none_when_loan_does_not_exist(self):
@@ -81,3 +82,74 @@ class TestLoanRepository(unittest.TestCase):
 
         self.assertEqual(result, [loan1, loan2])
 
+
+    def test_list_active_returns_empty_list_when_repository_is_empty(self):
+        result = self.repository.list_active()
+
+        self.assertEqual(result,[])
+
+    def test_list_active_returns_empty_list_when_all_loans_are_returned(self):
+        loan1 = Loan(1, 1, 1, self.borrowed_at, self.returned_at, LoanStatus.RETURNED)
+        loan2 = Loan(2, 2, 2, self.borrowed_at, self.returned_at, LoanStatus.RETURNED)
+        self.repository.add(loan1)
+        self.repository.add(loan2)
+        
+        result = self.repository.list_active()
+
+        self.assertEqual(result, [])
+
+    def test_list_active_returns_all_loans_when_all_loans_are_active(self):
+        loan1 = Loan(1, 1, 1, self.borrowed_at)
+        loan2 = Loan(2, 2, 2, self.borrowed_at)
+        self.repository.add(loan1)
+        self.repository.add(loan2)
+        
+        result = self.repository.list_active()
+
+        self.assertEqual(result, [loan1, loan2])
+
+    def test_list_active_returns_only_active_loans_when_loans_are_mixed(self):
+        loan1 = Loan(1, 1, 1, self.borrowed_at)
+        loan2 = Loan(2, 2, 2, self.borrowed_at, self.returned_at, LoanStatus.RETURNED)
+        loan3 = Loan(3, 3, 3, self.borrowed_at)
+        loan4 = Loan(4, 4, 4, self.borrowed_at, self.returned_at, LoanStatus.RETURNED)
+        self.repository.add(loan1)
+        self.repository.add(loan2)
+        self.repository.add(loan3)
+        self.repository.add(loan4)
+        
+        result = self.repository.list_active()
+
+        self.assertEqual(result, [loan1, loan3])
+
+    def test_list_active_keeps_insertion_order(self):
+        loan1 = Loan(1, 1, 1, self.borrowed_at)
+        loan2 = Loan(2, 2, 2, self.borrowed_at, self.returned_at, LoanStatus.RETURNED)
+        loan3 = Loan(3, 3, 3, self.borrowed_at)
+        loan4 = Loan(4, 4, 4, self.borrowed_at, self.returned_at, LoanStatus.RETURNED)
+        self.repository.add(loan1)
+        self.repository.add(loan2)
+        self.repository.add(loan3)
+        self.repository.add(loan4)
+        
+        result = self.repository.list_active()
+        
+        self.assertIs(result[0], loan1)
+        self.assertIs(result[1], loan3)
+
+    def test_list_active_modifying_returned_list_does_not_modify_repository(self):
+        loan1 = Loan(1, 1, 1, self.borrowed_at)
+        loan2 = Loan(2, 2, 2, self.borrowed_at, self.returned_at, LoanStatus.RETURNED)
+        loan3 = Loan(3, 3, 3, self.borrowed_at)
+        loan4 = Loan(4, 4, 4, self.borrowed_at, self.returned_at, LoanStatus.RETURNED)
+        self.repository.add(loan1)
+        self.repository.add(loan2)
+        self.repository.add(loan3)
+        self.repository.add(loan4)
+
+        modified_list = self.repository.list_active()
+        modified_list.clear()
+
+        result = self.repository.list_active()
+
+        self.assertEqual(result, [loan1, loan3])
