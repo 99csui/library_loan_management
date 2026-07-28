@@ -18,3 +18,6 @@ class LoanRepository:
             if loan.id == loan_id:
                 return loan
         return None
+    
+    def list_all(self) -> list[Loan]:
+        return self.loans.copy()

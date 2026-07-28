@@ -42,3 +42,42 @@ class TestLoanRepository(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.repository.add(loan2)
 
+
+    def test_list_all_returns_empty_list_when_repository_is_empty(self):
+        result = self.repository.list_all()
+
+        self.assertEqual(result,[])
+
+    def test_list_all_returns_all_stored_loans(self):
+        loan1 = Loan(1, 1, 1, self.borrowed_at)
+        loan2 = Loan(2, 2, 2, self.borrowed_at)
+        self.repository.add(loan1)
+        self.repository.add(loan2)
+
+        result = self.repository.list_all()
+        self.assertEqual(result, [loan1, loan2])
+
+    def test_list_all_keeps_insertion_order(self):
+        loan1 = Loan(1, 1, 1, self.borrowed_at)
+        loan2 = Loan(2, 2, 2, self.borrowed_at)
+        self.repository.add(loan1)
+        self.repository.add(loan2)
+
+        result = self.repository.list_all()
+
+        self.assertIs(result[0], loan1)
+        self.assertIs(result[1], loan2)
+
+    def test_list_all_modifying_returned_list_does_not_modify_repository(self):
+        loan1 = Loan(1, 1, 1, self.borrowed_at)
+        loan2 = Loan(2, 2, 2, self.borrowed_at)
+        self.repository.add(loan1)
+        self.repository.add(loan2)
+
+        modified_list = self.repository.list_all()
+        modified_list.clear()
+
+        result = self.repository.list_all()
+
+        self.assertEqual(result, [loan1, loan2])
+
