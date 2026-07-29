@@ -38,3 +38,5 @@ class LoanRepository:
     def find_active_by_member_id(self, member_id: int) -> list[Loan]:
         return [loan for loan in self.list_active() if loan.member_id == member_id]
 
+    def list_by_member_id(self, member_id: int) -> list[Loan]:
+        return [loan for loan in self.list_all() if loan.member_id == member_id]
