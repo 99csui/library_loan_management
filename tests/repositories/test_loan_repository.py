@@ -153,3 +153,55 @@ class TestLoanRepository(unittest.TestCase):
         result = self.repository.list_active()
 
         self.assertEqual(result, [loan1, loan3])
+
+
+    def test_find_active_by_book_id_returns_none_when_repository_is_empty(self):
+        result = self.repository.find_active_by_book_id(1)
+
+        self.assertIsNone(result)
+
+    def test_find_active_by_book_id_returns_active_loan_when_book_has_an_active_loan(self):
+        loan = Loan(1, 1, 1, self.borrowed_at)
+        self.repository.add(loan)
+        result = self.repository.find_active_by_book_id(loan.book_id)
+
+        self.assertIs(result, loan)
+
+    def test_find_active_by_book_id_returns_none_when_book_does_not_exist(self):
+        loan = Loan(1, 1, 1, self.borrowed_at)
+        self.repository.add(loan)
+        result = self.repository.find_active_by_book_id(2)
+
+        self.assertIsNone(result)
+
+    def test_find_active_by_book_id_returns_none_when_book_has_only_returned_loans(self):
+        loan1 = Loan(1, 1, 1, self.borrowed_at, self.returned_at, LoanStatus.RETURNED)
+        loan2 = Loan(2, 1, 2, self.borrowed_at, self.returned_at, LoanStatus.RETURNED)
+        self.repository.add(loan1)
+        self.repository.add(loan2)
+        result = self.repository.find_active_by_book_id(1)
+
+        self.assertIsNone(result)
+
+    def test_find_active_by_book_id_ignores_returned_loans_and_returns_active_loan(self):
+        loan1 = Loan(1, 1, 1, self.borrowed_at, self.returned_at, LoanStatus.RETURNED)
+        loan2 = Loan(2, 1, 2, self.borrowed_at, self.returned_at, LoanStatus.RETURNED)
+        loan3 = Loan(3, 1, 3, self.borrowed_at, self.returned_at, LoanStatus.RETURNED)
+        loan4 = Loan(4, 1, 4, self.borrowed_at)
+        self.repository.add(loan1)
+        self.repository.add(loan2)
+        self.repository.add(loan3)
+        self.repository.add(loan4)
+        result = self.repository.find_active_by_book_id(loan4.book_id)
+
+        self.assertIs(result, loan4)
+
+    def test_find_active_by_book_id_returns_none_when_active_loan_belongs_to_another_book(self):
+        loan1 = Loan(1, 1, 1, self.borrowed_at, self.returned_at, LoanStatus.RETURNED)
+        loan2 = Loan(2, 2, 2, self.borrowed_at)
+        self.repository.add(loan1)
+        self.repository.add(loan2)
+        result = self.repository.find_active_by_book_id(1)
+
+        self.assertIsNone(result)
+        

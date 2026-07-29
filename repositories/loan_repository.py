@@ -26,3 +26,12 @@ class LoanRepository:
     
     def list_active(self) -> list[Loan]:
         return [loan for loan in self.list_all() if loan.status == LoanStatus.ACTIVE]
+
+    def find_active_by_book_id(self, book_id: int) -> Loan | None:
+        active_loans = self.list_active()
+
+        for loan in active_loans:
+            if loan.book_id == book_id:
+                return loan
+        return None
+
