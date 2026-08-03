@@ -62,20 +62,20 @@ class TestLibraryService(unittest.TestCase):
         self.assertEqual(len(self.book_repository.list_all()), 1)
 
     def test_register_member_adds_member_to_repository(self):
-        registered_member = self.service.register_member(1,"Harry Owen")
+        registered_member = self.service.register_member(1, "Harry Owen")
         stored_member = self.member_repository.get_by_id(1)
 
         self.assertEqual(registered_member, stored_member)
 
     def test_register_member_returns_registered_member(self):
-        registered_member = self.service.register_member(1,"Harry Owen")
+        registered_member = self.service.register_member(1, "Harry Owen")
 
         self.assertIsInstance(registered_member, Member)
         self.assertEqual(registered_member.id, 1)
         self.assertEqual(registered_member.name, "Harry Owen")
 
     def test_register_member_stores_returned_member_instance(self):
-        registered_member = self.service.register_member(1,"Harry Owen")
+        registered_member = self.service.register_member(1, "Harry Owen")
         stored_member = self.member_repository.get_by_id(1)
 
         self.assertIs(registered_member, stored_member)
@@ -125,3 +125,40 @@ class TestLibraryService(unittest.TestCase):
 
         self.assertTrue(result)
         self.assertIsNone(self.book_repository.get_by_id(1))
+
+    def test_remove_member_removes_member_when_member_has_no_active_loans(self):
+        self.service.register_member(1, "Harry Owen")
+        result = self.service.remove_member(1)
+
+        self.assertTrue(result)
+        self.assertIsNone(self.member_repository.get_by_id(1))
+
+    def test_remove_member_raises_value_error_when_member_does_not_exist(self):
+        self.service.register_member(1, "Harry Owen")
+
+        with self.assertRaises(ValueError):
+            self.service.remove_member(2)
+    
+    def test_remove_member_raises_value_error_when_member_has_active_loans(self):
+        loan = Loan(1, 1, 1, self.borrowed_at)
+        self.loan_repository.add(loan)
+        registered_member = self.service.register_member(1, "Harry Owen")
+
+        with self.assertRaises(ValueError):
+            self.service.remove_member(1)
+        self.assertIs(self.member_repository.get_by_id(1), registered_member)
+
+    def test_remove_member_removes_member_when_member_has_only_returned_loans(self):
+        self.service.register_member(1, "Harry Owen")
+        loan1 = Loan(1, 1, 1, self.borrowed_at, self.returned_at, LoanStatus.RETURNED)
+        loan2 = Loan(2, 2, 1, self.borrowed_at, self.returned_at, LoanStatus.RETURNED)
+        loan3 = Loan(3, 3, 1, self.borrowed_at, self.returned_at, LoanStatus.RETURNED)
+        loan4 = Loan(4, 4, 1, self.borrowed_at, self.returned_at, LoanStatus.RETURNED)
+        self.loan_repository.add(loan1)
+        self.loan_repository.add(loan2)
+        self.loan_repository.add(loan3)
+        self.loan_repository.add(loan4)
+
+        self.service.remove_member(1)
+
+        self.assertIsNone(self.member_repository.get_by_id(1))
