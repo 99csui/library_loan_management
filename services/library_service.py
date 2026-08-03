@@ -3,6 +3,7 @@ from repositories.member_repository import MemberRepository
 from repositories.loan_repository import LoanRepository
 
 from models.book import Book
+from models.member import Member
 
 
 class LibraryService:
@@ -16,3 +17,7 @@ class LibraryService:
         self._book_repository.add(book)
         return book
 
+    def register_member(self, member_id: int, name: str) -> Member:
+        member = Member(member_id, name)
+        self._member_repository.add(member)
+        return member

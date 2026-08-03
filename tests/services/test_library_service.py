@@ -6,6 +6,7 @@ from repositories.loan_repository import LoanRepository
 from services.library_service import LibraryService
 
 from models.book import Book
+from models.member import Member
 
 
 class TestLibraryService(unittest.TestCase):
@@ -54,3 +55,30 @@ class TestLibraryService(unittest.TestCase):
             self.service.register_book(1, "Python Crash Course", "Eric Matthes")
         
         self.assertEqual(len(self.book_repository.list_all()), 1)
+
+    def test_register_member_adds_member_to_repository(self):
+        registered_member = self.service.register_member(1,"Harry Owen")
+        stored_member = self.member_repository.get_by_id(1)
+
+        self.assertEqual(registered_member, stored_member)
+
+    def test_register_member_returns_registered_member(self):
+        registered_member = self.service.register_member(1,"Harry Owen")
+
+        self.assertIsInstance(registered_member, Member)
+        self.assertEqual(registered_member.id, 1)
+        self.assertEqual(registered_member.name, "Harry Owen")
+
+    def test_register_member_stores_returned_member_instance(self):
+        registered_member = self.service.register_member(1,"Harry Owen")
+        stored_member = self.member_repository.get_by_id(1)
+
+        self.assertIs(registered_member, stored_member)
+
+    def test_register_member_raises_error_for_duplicate_member_id(self):
+        self.service.register_member(1, "Harry Owen")
+        
+        with self.assertRaises(ValueError):
+            self.service.register_member(1, "Fran Osorio")
+        
+        self.assertEqual(len(self.member_repository.list_all()), 1)
