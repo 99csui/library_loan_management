@@ -21,3 +21,15 @@ class LibraryService:
         member = Member(member_id, name)
         self._member_repository.add(member)
         return member
+    
+    def remove_book(self, book_id: int) -> bool:
+        stored_book = self._book_repository.get_by_id(book_id)
+        if stored_book is None:
+            raise ValueError("book does not exist")
+        
+        is_active = self._loan_repository.find_active_by_book_id(book_id)
+        if is_active is not None:
+            raise ValueError("cannot remove a book with an active loan")
+        
+        result = self._book_repository.remove(book_id)
+        return result

@@ -1,4 +1,5 @@
 import unittest
+from datetime import datetime
 
 from repositories.book_repository import BookRepository
 from repositories.member_repository import MemberRepository
@@ -7,6 +8,8 @@ from services.library_service import LibraryService
 
 from models.book import Book
 from models.member import Member
+from models.loan import Loan
+from models.enums import LoanStatus
 
 
 class TestLibraryService(unittest.TestCase):
@@ -16,6 +19,8 @@ class TestLibraryService(unittest.TestCase):
         self.member_repository = MemberRepository()
         self.loan_repository = LoanRepository()
         self.service = LibraryService(self.book_repository, self.member_repository, self.loan_repository)
+        self.borrowed_at = datetime(2026, 7, 17, 15, 30)
+        self.returned_at = datetime(2026, 7, 20, 12, 0)
     
     def test_library_service_can_be_created_with_repositories(self):
         self.assertIsInstance(self.service, LibraryService)
@@ -82,3 +87,41 @@ class TestLibraryService(unittest.TestCase):
             self.service.register_member(1, "Fran Osorio")
         
         self.assertEqual(len(self.member_repository.list_all()), 1)
+
+    def test_remove_book_removes_book_when_book_has_no_active_loan(self):
+        self.service.register_book(1, "Clean Code", "Robert C. Martin")
+        result = self.service.remove_book(1)
+
+        self.assertTrue(result)
+        self.assertIsNone(self.book_repository.get_by_id(1))
+
+    def test_remove_book_raises_value_error_when_book_does_not_exist(self):
+        self.service.register_book(1, "Clean Code", "Robert C. Martin")
+
+        with self.assertRaises(ValueError):
+            self.service.remove_book(2)
+
+    def test_remove_book_raises_value_error_when_book_has_active_loan(self):
+        registered_book = self.service.register_book(1, "Clean Code", "Robert C. Martin")
+        loan = Loan(1, 1, 1, self.borrowed_at)
+        self.loan_repository.add(loan)
+        
+        with self.assertRaises(ValueError):
+            self.service.remove_book(1)
+        self.assertIs(self.book_repository.get_by_id(1), registered_book)
+    
+    def test_remove_book_removes_book_when_book_has_only_returned_loans(self):
+        self.service.register_book(1, "Clean Code", "Robert C. Martin")
+        loan1 = Loan(1, 1, 1, self.borrowed_at, self.returned_at, LoanStatus.RETURNED)
+        loan2 = Loan(2, 1, 2, self.borrowed_at, self.returned_at, LoanStatus.RETURNED)
+        loan3 = Loan(3, 1, 3, self.borrowed_at, self.returned_at, LoanStatus.RETURNED)
+        loan4 = Loan(4, 1, 4, self.borrowed_at, self.returned_at, LoanStatus.RETURNED)
+        self.loan_repository.add(loan1)
+        self.loan_repository.add(loan2)
+        self.loan_repository.add(loan3)
+        self.loan_repository.add(loan4)
+
+        result = self.service.remove_book(1)
+
+        self.assertTrue(result)
+        self.assertIsNone(self.book_repository.get_by_id(1))
