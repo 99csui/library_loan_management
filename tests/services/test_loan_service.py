@@ -1,4 +1,5 @@
 import unittest
+from datetime import datetime
 
 from services.loan_service import LoanService
 from services.library_service import LibraryService
@@ -11,7 +12,7 @@ from models.book import Book
 from models.member import Member
 from models.loan import Loan
 from models.enums import LoanStatus
-
+datetime(2026, 7, 17, 15, 30)
 
 class TestLoanService(unittest.TestCase):
 
@@ -21,7 +22,7 @@ class TestLoanService(unittest.TestCase):
         self.loan_repository = LoanRepository()
         self.service = LoanService(self.book_repository, self.member_repository, self.loan_repository)
         self.library_service = LibraryService(self.book_repository, self.member_repository, self.loan_repository)
-
+        
     def test_loan_service_can_be_created_with_repositories(self):
         self.assertIsInstance(self.service, LoanService)
 
@@ -45,3 +46,17 @@ class TestLoanService(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.service.borrow_book(1, 1, 1)
         self.assertEqual(len(self.loan_repository.list_all()), 0)
+
+    def test_borrow_book_raises_value_error_when_book_has_active_loan(self):
+        self.library_service.register_book(1, "Clean Code", "Robert C. Martin")
+        self.library_service.register_member(1, "Harry Owen")
+        loan = Loan(1, 1, 1, datetime(2026, 7, 17, 15, 30))
+        self.loan_repository.add(loan)
+        with self.assertRaises(ValueError):
+            self.service.borrow_book(2, 1, 1)
+        self.assertEqual(len(self.loan_repository.list_all()), 1)
+
+    def test_borrow_book_does_not_raise_when_active_loan_belongs_to_another_book(self):
+        pass
+
+    

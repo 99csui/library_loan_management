@@ -20,4 +20,6 @@ class LoanService:
         if not self._member_repository.exists(member_id):
             raise ValueError("member does not exist")
         
+        if self._loan_repository.find_active_by_book_id(book_id) is not None:
+            raise ValueError("cannot borrow a book with an active loan")
 
