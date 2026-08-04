@@ -12,6 +12,7 @@ class LoanService:
         self._book_repository = book_repository
         self._member_repository = member_repository
         self._loan_repository = loan_repository
+        self.MAX_ACTIVE_LOANS_PER_MEMBER = 3
 
     def borrow_book(self, loan_id: int, book_id: int, member_id: int) -> None:
         if not self._book_repository.exists(book_id):
@@ -23,3 +24,5 @@ class LoanService:
         if self._loan_repository.find_active_by_book_id(book_id) is not None:
             raise ValueError("cannot borrow a book with an active loan")
 
+        if len(self._loan_repository.find_active_by_member_id(member_id)) >= self.MAX_ACTIVE_LOANS_PER_MEMBER:
+            raise ValueError("member has reached the active loan limit")

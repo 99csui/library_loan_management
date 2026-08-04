@@ -58,5 +58,20 @@ class TestLoanService(unittest.TestCase):
 
     def test_borrow_book_does_not_raise_when_active_loan_belongs_to_another_book(self):
         pass
-
+    
+    def test_borrow_book_raises_value_error_when_member_reaches_active_loan_limit(self):
+        self.library_service.register_book(1, "Clean Code", "Robert C. Martin")
+        self.library_service.register_book(2, "Python Crash Course", "Eric Matthes")
+        self.library_service.register_book(3, "Code Complete", "Steve McConnell")
+        self.library_service.register_book(4, "Designing Data-Intensive Applications", "Martin Kleppmann")
+        self.library_service.register_member(1, "Harry Owen")
+        loan1 = Loan(1, 1, 1, datetime(2026, 7, 17, 15, 30))
+        loan2 = Loan(2, 2, 1, datetime(2026, 7, 17, 15, 30))
+        loan3 = Loan(3, 3, 1, datetime(2026, 7, 17, 15, 30))
+        self.loan_repository.add(loan1)
+        self.loan_repository.add(loan2)
+        self.loan_repository.add(loan3)
+        with self.assertRaises(ValueError):
+            self.service.borrow_book(4, 4, 1)
+        self.assertEqual(len(self.loan_repository.list_all()), 3)
     
