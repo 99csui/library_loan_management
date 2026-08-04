@@ -12,3 +12,12 @@ class LoanService:
         self._book_repository = book_repository
         self._member_repository = member_repository
         self._loan_repository = loan_repository
+
+    def borrow_book(self, loan_id: int, book_id: int, member_id: int) -> None:
+        if not self._book_repository.exists(book_id):
+            raise ValueError("book does not exist")
+        
+        if not self._member_repository.exists(member_id):
+            raise ValueError("member does not exist")
+        
+
