@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from repositories.book_repository import BookRepository
 from repositories.member_repository import MemberRepository
 from repositories.loan_repository import LoanRepository
@@ -14,7 +16,7 @@ class LoanService:
         self._loan_repository = loan_repository
         self.MAX_ACTIVE_LOANS_PER_MEMBER = 3
 
-    def borrow_book(self, loan_id: int, book_id: int, member_id: int) -> None:
+    def borrow_book(self, loan_id: int, book_id: int, member_id: int) -> Loan:
         if not self._book_repository.exists(book_id):
             raise ValueError("book does not exist")
         
@@ -26,3 +28,9 @@ class LoanService:
 
         if len(self._loan_repository.find_active_by_member_id(member_id)) >= self.MAX_ACTIVE_LOANS_PER_MEMBER:
             raise ValueError("member has reached the active loan limit")
+        
+        borrowed_at = datetime.now()
+        loan = Loan(loan_id, book_id, member_id, borrowed_at)
+        self._loan_repository.add(loan)
+        
+        return loan

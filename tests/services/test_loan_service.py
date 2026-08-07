@@ -22,7 +22,7 @@ class TestLoanService(unittest.TestCase):
         self.loan_repository = LoanRepository()
         self.service = LoanService(self.book_repository, self.member_repository, self.loan_repository)
         self.library_service = LibraryService(self.book_repository, self.member_repository, self.loan_repository)
-        
+
     def test_loan_service_can_be_created_with_repositories(self):
         self.assertIsInstance(self.service, LoanService)
 
@@ -75,3 +75,55 @@ class TestLoanService(unittest.TestCase):
             self.service.borrow_book(4, 4, 1)
         self.assertEqual(len(self.loan_repository.list_all()), 3)
     
+    def test_borrow_book_returns_created_loan(self):
+        book = self.library_service.register_book(1, "Designing Data-Intensive Applications", "Martin Kleppmann")
+        member = self.library_service.register_member(1, "Harry Owen")
+        registered_loan = self.service.borrow_book(1, book.id, member.id)
+
+        self.assertIsInstance(registered_loan, Loan)
+        self.assertEqual(registered_loan.id, 1)
+        self.assertEqual(registered_loan.book_id, book.id)
+        self.assertEqual(registered_loan.member_id, member.id)
+
+    def test_borrow_book_adds_loan_to_repository(self):
+        book = self.library_service.register_book(1, "Designing Data-Intensive Applications", "Martin Kleppmann")
+        member = self.library_service.register_member(1, "Harry Owen")
+        registered_loan = self.service.borrow_book(1, book.id, member.id)
+        stored_loan = self.loan_repository.get_by_id(registered_loan.id)
+
+        self.assertEqual(stored_loan, registered_loan)
+
+    def test_borrow_book_stores_returned_loan_instance(self):
+        book = self.library_service.register_book(1, "Designing Data-Intensive Applications", "Martin Kleppmann")
+        member = self.library_service.register_member(1, "Harry Owen")
+        registered_loan = self.service.borrow_book(1, book.id, member.id)
+        stored_loan = self.loan_repository.get_by_id(registered_loan.id)
+
+        self.assertIs(registered_loan, stored_loan)
+
+    def test_borrow_book_creates_active_loan(self):
+        book = self.library_service.register_book(1, "Designing Data-Intensive Applications", "Martin Kleppmann")
+        member = self.library_service.register_member(1, "Harry Owen")
+        registered_loan = self.service.borrow_book(1, book.id, member.id)
+
+        self.assertTrue(registered_loan.is_active())
+
+    def test_borrow_book_sets_current_borrowed_at(self):
+        book = self.library_service.register_book(1, "Designing Data-Intensive Applications", "Martin Kleppmann")
+        member = self.library_service.register_member(1, "Harry Owen")
+        time_before = datetime.now()
+        registered_loan = self.service.borrow_book(1, book.id, member.id)
+        time_after = datetime.now()
+        
+        self.assertGreaterEqual(registered_loan.borrowed_at, time_before)
+        self.assertLessEqual(registered_loan.borrowed_at, time_after)
+
+    def test_borrow_book_raises_value_error_when_loan_id_already_exists(self):
+        book1 = self.library_service.register_book(1, "Clean Code", "Robert C. Martin")
+        book2 = self.library_service.register_book(2, "Python Crash Course", "Eric Matthes")
+        member = self.library_service.register_member(1, "Harry Owen")
+        registered_loan = self.service.borrow_book(1, book1.id, member.id)
+        
+        with self.assertRaises(ValueError):
+            self.service.borrow_book(1, book2.id, member.id)
+        self.assertEqual(len(self.loan_repository.list_active()), 1)
