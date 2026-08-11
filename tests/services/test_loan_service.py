@@ -127,3 +127,23 @@ class TestLoanService(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.service.borrow_book(1, book2.id, member.id)
         self.assertEqual(len(self.loan_repository.list_active()), 1)
+
+    def test_return_book_raises_value_error_when_loan_does_not_exist(self):
+        book = self.library_service.register_book(1, "Clean Code", "Robert C. Martin")
+        member = self.library_service.register_member(1, "Harry Owen")
+        loan = self.service.borrow_book(1, book.id, member.id)
+
+        with self.assertRaises(ValueError):
+            self.service.return_book(2)
+        self.assertEqual(self.loan_repository.list_all(), [loan])
+
+    def test_return_book_raises_value_error_when_loan_is_already_returned(self):
+        book = self.library_service.register_book(1, "Clean Code", "Robert C. Martin")
+        member = self.library_service.register_member(1, "Harry Owen")
+        loan = Loan(1, 1, 1, datetime(2026, 7, 17, 15, 30), datetime(2026, 7, 17, 15, 30), LoanStatus.RETURNED)
+        self.loan_repository.add(loan)
+
+        with self.assertRaises(ValueError):
+            self.service.return_book(1)
+        self.assertEqual(self.loan_repository.list_all(), [loan])
+        self.assertFalse(loan.is_active())

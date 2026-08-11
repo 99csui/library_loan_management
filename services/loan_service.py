@@ -34,3 +34,12 @@ class LoanService:
         self._loan_repository.add(loan)
         
         return loan
+
+    def return_book(self, loan_id: int):
+        loan = self._loan_repository.get_by_id(loan_id)
+        if loan is None:
+            raise ValueError("the loan does not exist")
+
+        if not loan.is_active():
+            raise ValueError("cannot return an already returned loan")
+        
