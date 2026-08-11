@@ -147,3 +147,40 @@ class TestLoanService(unittest.TestCase):
             self.service.return_book(1)
         self.assertEqual(self.loan_repository.list_all(), [loan])
         self.assertFalse(loan.is_active())
+
+    def test_return_book_returns_returned_loan(self):
+        book = self.library_service.register_book(1, "Clean Code", "Robert C. Martin")
+        member = self.library_service.register_member(1, "Harry Owen")
+        loan = self.service.borrow_book(1, book.id, member.id)
+        self.service.return_book(loan.id)
+
+        self.assertEqual(len(self.loan_repository.list_active()), 0)
+
+    def test_return_book_returns_stored_loan_instance(self):
+        book = self.library_service.register_book(1, "Clean Code", "Robert C. Martin")
+        member = self.library_service.register_member(1, "Harry Owen")
+        loan = self.service.borrow_book(1, book.id, member.id)
+        returned_loan = self.service.return_book(loan.id)
+
+        self.assertIsInstance(returned_loan, Loan)
+        self.assertIs(returned_loan, loan)
+
+    def test_return_book_marks_loan_as_returned(self):
+        book = self.library_service.register_book(1, "Clean Code", "Robert C. Martin")
+        member = self.library_service.register_member(1, "Harry Owen")
+        loan = self.service.borrow_book(1, book.id, member.id)
+        returned_loan = self.service.return_book(loan.id)
+
+        self.assertFalse(returned_loan.is_active())
+        self.assertEqual(returned_loan.status, LoanStatus.RETURNED)
+
+    def test_return_book_sets_current_returned_at(self):
+        book = self.library_service.register_book(1, "Clean Code", "Robert C. Martin")
+        member = self.library_service.register_member(1, "Harry Owen")
+        loan = self.service.borrow_book(1, book.id, member.id)
+        time_before = datetime.now()
+        returned_loan = self.service.return_book(loan.id)
+        time_after = datetime.now()
+
+        self.assertGreaterEqual(returned_loan.returned_at, time_before)
+        self.assertLessEqual(returned_loan.returned_at, time_after)

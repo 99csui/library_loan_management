@@ -35,11 +35,15 @@ class LoanService:
         
         return loan
 
-    def return_book(self, loan_id: int):
+    def return_book(self, loan_id: int) -> Loan:
         loan = self._loan_repository.get_by_id(loan_id)
         if loan is None:
             raise ValueError("the loan does not exist")
 
         if not loan.is_active():
             raise ValueError("cannot return an already returned loan")
-        
+
+        now = datetime.now()
+        loan.return_loan(now)
+
+        return loan
