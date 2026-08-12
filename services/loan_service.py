@@ -47,3 +47,10 @@ class LoanService:
         loan.return_loan(now)
 
         return loan
+
+    def list_available_books(self) -> list[Book]:
+        return [
+            book
+            for book in self._book_repository.list_all()
+            if self._loan_repository.find_active_by_book_id(book.id) is None
+            ]

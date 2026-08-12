@@ -184,3 +184,79 @@ class TestLoanService(unittest.TestCase):
 
         self.assertGreaterEqual(returned_loan.returned_at, time_before)
         self.assertLessEqual(returned_loan.returned_at, time_after)
+
+    def test_list_available_books_returns_empty_list_when_no_books_exist(self):
+        result = self.service.list_available_books()
+
+        self.assertEqual(result, [])
+
+    def test_list_available_books_returns_all_books_when_none_have_active_loans(self):
+        book1 = self.library_service.register_book(1, "Clean Code", "Robert C. Martin")
+        book2 = self.library_service.register_book(2, "Python Crash Course", "Eric Matthes")
+        member = self.library_service.register_member(1, "Harry Owen")
+        loan1 = self.service.borrow_book(1, book1.id, member.id)
+        loan2 = self.service.borrow_book(2, book2.id, member.id)
+        self.service.return_book(loan1.id)
+        self.service.return_book(loan2.id)
+        result = self.service.list_available_books()
+
+        self.assertEqual(result, [book1, book2])
+
+    def test_list_available_books_excludes_books_with_active_loans(self):
+        book1 = self.library_service.register_book(1, "Clean Code", "Robert C. Martin")
+        book2 = self.library_service.register_book(2, "Python Crash Course", "Eric Matthes")
+        member = self.library_service.register_member(1, "Harry Owen")
+        self.service.borrow_book(1, book1.id, member.id)
+
+        loan = self.service.borrow_book(2, book2.id, member.id)
+        self.service.return_book(loan.id)
+        result = self.service.list_available_books()
+        
+        self.assertEqual(result, [book2])
+
+    def test_list_available_books_includes_books_with_only_returned_loans(self):
+        book1 = self.library_service.register_book(1, "Clean Code", "Robert C. Martin")
+        book2 = self.library_service.register_book(2, "Python Crash Course", "Eric Matthes")
+        book3 = self.library_service.register_book(3, "Designing Data-Intensive Applications", "Martin Kleppmann")
+        member = self.library_service.register_member(1, "Harry Owen")
+        loan1 = self.service.borrow_book(1, book1.id, member.id)
+        loan2 = self.service.borrow_book(2, book2.id, member.id)
+        loan3 = self.service.borrow_book(3, book3.id, member.id)
+
+        self.service.return_book(loan1.id)
+        self.service.return_book(loan2.id)
+        result = self.service.list_available_books()
+
+        self.assertEqual(result, [book1, book2])
+
+    def test_list_available_books_preserves_book_insertion_order(self):
+        book1 = self.library_service.register_book(1, "Clean Code", "Robert C. Martin")
+        book2 = self.library_service.register_book(2, "Python Crash Course", "Eric Matthes")
+        book3 = self.library_service.register_book(3, "Designing Data-Intensive Applications", "Martin Kleppmann")
+        member = self.library_service.register_member(1, "Harry Owen")
+        loan1 = self.service.borrow_book(1, book1.id, member.id)
+        loan2 = self.service.borrow_book(2, book2.id, member.id)
+        loan3 = self.service.borrow_book(3, book3.id, member.id)
+        returned_loan1 = self.service.return_book(loan1.id)
+        returned_loan3 = self.service.return_book(loan3.id)
+        returned_loan2 = self.service.return_book(loan2.id)
+        result = self.service.list_available_books()
+
+        self.assertEqual(result[0], book1)
+        self.assertEqual(result[1], book2)
+        self.assertEqual(result[2], book3)
+
+    def test_list_available_books_modifying_returned_list_does_not_modify_repository(self):
+        book1 = self.library_service.register_book(1, "Clean Code", "Robert C. Martin")
+        book2 = self.library_service.register_book(2, "Python Crash Course", "Eric Matthes")
+        member = self.library_service.register_member(1, "Harry Owen")
+        loan1 = self.service.borrow_book(1, book1.id, member.id)
+        loan2 = self.service.borrow_book(2, book2.id, member.id)
+        self.service.return_book(loan1.id)
+        self.service.return_book(loan2.id)
+
+        modified_list = self.service.list_available_books()
+        modified_list.clear()
+        result = self.service.list_available_books()
+
+        self.assertEqual(result, [book1, book2])
