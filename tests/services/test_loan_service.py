@@ -260,3 +260,111 @@ class TestLoanService(unittest.TestCase):
         result = self.service.list_available_books()
 
         self.assertEqual(result, [book1, book2])
+
+    def test_list_active_loans_returns_empty_list_when_no_loans_exist(self):
+        result = self.service.list_active_loans()
+        self.assertEqual(result, [])
+
+    def test_list_active_loans_returns_only_active_loans(self):
+        book1 = self.library_service.register_book(1, "Clean Code", "Robert C. Martin")
+        book2 = self.library_service.register_book(2, "Python Crash Course", "Eric Matthes")
+        member = self.library_service.register_member(1, "Harry Owen")
+        loan1 = self.service.borrow_book(1, book1.id, member.id)
+        loan2 = self.service.borrow_book(2, book2.id, member.id)
+        self.service.return_book(loan1.id)
+        result = self.service.list_active_loans()
+
+        self.assertEqual(result, [loan2])
+
+    def test_list_active_loans_preserves_insertion_order(self):
+        book1 = self.library_service.register_book(1, "Clean Code", "Robert C. Martin")
+        book2 = self.library_service.register_book(2, "Python Crash Course", "Eric Matthes")
+        member = self.library_service.register_member(1, "Harry Owen")
+        loan1 = self.service.borrow_book(1, book1.id, member.id)
+        loan2 = self.service.borrow_book(2, book2.id, member.id)
+        result = self.service.list_active_loans()
+
+        self.assertEqual(result[0], loan1)
+        self.assertEqual(result[1], loan2)
+
+    def test_list_active_loans_modifying_returned_list_does_not_modify_repository(self):
+        book1 = self.library_service.register_book(1, "Clean Code", "Robert C. Martin")
+        book2 = self.library_service.register_book(2, "Python Crash Course", "Eric Matthes")
+        member = self.library_service.register_member(1, "Harry Owen")
+        loan1 = self.service.borrow_book(1, book1.id, member.id)
+        loan2 = self.service.borrow_book(2, book2.id, member.id)
+
+        modified_list = self.service.list_active_loans()
+        modified_list.clear()
+        result = self.service.list_active_loans()
+
+        self.assertEqual(result, [loan1, loan2])
+
+    def test_find_loans_by_member_returns_empty_list_when_member_has_no_loans(self):
+        result = self.service.find_loans_by_member(1)
+
+        self.assertEqual(result, [])
+
+    def test_find_loans_by_member_returns_all_loans_for_member(self):
+        book1 = self.library_service.register_book(1, "Clean Code", "Robert C. Martin")
+        book2 = self.library_service.register_book(2, "Python Crash Course", "Eric Matthes")
+        member = self.library_service.register_member(1, "Harry Owen")
+        loan1 = self.service.borrow_book(1, book1.id, member.id)
+        loan2 = self.service.borrow_book(2, book2.id, member.id)
+        result = self.service.find_loans_by_member(member.id)
+
+        self.assertEqual(result, [loan1, loan2])
+
+    def test_find_loans_by_member_includes_active_and_returned_loans(self):
+        book1 = self.library_service.register_book(1, "Clean Code", "Robert C. Martin")
+        book2 = self.library_service.register_book(2, "Python Crash Course", "Eric Matthes")
+        member = self.library_service.register_member(1, "Harry Owen")
+        loan1 = self.service.borrow_book(1, book1.id, member.id)
+        loan2 = self.service.borrow_book(2, book2.id, member.id)
+        self.service.return_book(loan2.id)
+        result = self.service.find_loans_by_member(member.id)
+
+        self.assertEqual(result, [loan1, loan2])
+
+    def test_find_loans_by_member_ignores_loans_from_other_members(self):
+        book1 = self.library_service.register_book(1, "Clean Code", "Robert C. Martin")
+        book2 = self.library_service.register_book(2, "Python Crash Course", "Eric Matthes")
+        book3 = self.library_service.register_book(3, "Designing Data-Intensive Applications", "Martin Kleppmann")
+        member1 = self.library_service.register_member(1, "Harry Owen")
+        member2 = self.library_service.register_member(2, "Francisca Osorio")
+        loan1 = self.service.borrow_book(1, book1.id, member1.id)
+        loan2 = self.service.borrow_book(2, book2.id, member1.id)
+        loan3 = self.service.borrow_book(3, book3.id, member2.id)
+        self.service.return_book(loan2.id)
+        result = self.service.find_loans_by_member(member1.id)
+        
+        self.assertEqual(result, [loan1, loan2])
+
+    def test_find_loans_by_member_preserves_insertion_order(self):
+        book1 = self.library_service.register_book(1, "Clean Code", "Robert C. Martin")
+        book2 = self.library_service.register_book(2, "Python Crash Course", "Eric Matthes")
+        book3 = self.library_service.register_book(3, "Designing Data-Intensive Applications", "Martin Kleppmann")
+        member = self.library_service.register_member(1, "Harry Owen")
+        loan1 = self.service.borrow_book(1, book1.id, member.id)
+        loan2 = self.service.borrow_book(2, book2.id, member.id)
+        loan3 = self.service.borrow_book(3, book3.id, member.id)
+        self.service.return_book(loan2.id)
+        result = self.service.find_loans_by_member(member.id)
+        
+        self.assertEqual(result[0], loan1)
+        self.assertEqual(result[1], loan2)
+        self.assertEqual(result[2], loan3)
+
+    def test_find_loans_by_member_modifying_returned_list_does_not_modify_repository(self):
+        book1 = self.library_service.register_book(1, "Clean Code", "Robert C. Martin")
+        book2 = self.library_service.register_book(2, "Python Crash Course", "Eric Matthes")
+        member = self.library_service.register_member(1, "Harry Owen")
+        loan1 = self.service.borrow_book(1, book1.id, member.id)
+        loan2 = self.service.borrow_book(2, book2.id, member.id)
+
+        modified_list = self.service.find_loans_by_member(member.id)
+        modified_list.clear()
+        result = self.service.find_loans_by_member(member.id)
+
+        self.assertEqual(result, [loan1, loan2])
+

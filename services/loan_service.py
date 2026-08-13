@@ -54,3 +54,9 @@ class LoanService:
             for book in self._book_repository.list_all()
             if self._loan_repository.find_active_by_book_id(book.id) is None
             ]
+
+    def list_active_loans(self) -> list[Loan]:
+        return self._loan_repository.list_active()
+
+    def find_loans_by_member(self, member_id: int) -> list[Loan]:
+        return self._loan_repository.list_by_member_id(member_id)
