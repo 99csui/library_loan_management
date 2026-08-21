@@ -1,4 +1,5 @@
 import unittest
+from unittest.mock import patch
 
 from cli.console_menu import ConsoleMenu
 
@@ -26,3 +27,15 @@ class TestConsoleMenu(unittest.TestCase):
 
     def test_console_menu_keeps_loan_service_dependency(self):
         self.assertIs(self.console_menu._loan_service, self.loan_service)
+
+    def test_run_stops_when_user_selects_exit(self):
+        with patch("builtins.input", return_value="0") as mocked_input:
+            self.console_menu.run()
+
+            mocked_input.assert_called_once()
+
+    def test_run_continues_after_invalid_option_until_exit(self):
+        with patch("builtins.input", side_effect=["99", "0"]) as mocked_input:
+            self.console_menu.run()
+        
+            self.assertEqual(mocked_input.call_count, 2)
