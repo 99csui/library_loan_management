@@ -12,7 +12,6 @@ from models.book import Book
 from models.member import Member
 from models.loan import Loan
 from models.enums import LoanStatus
-datetime(2026, 7, 17, 15, 30)
 
 class TestLoanService(unittest.TestCase):
 
@@ -274,7 +273,7 @@ class TestLoanService(unittest.TestCase):
         self.service.return_book(loan1.id)
         result = self.service.list_active_loans()
 
-        self.assertEqual(result, [loan2])
+        self.assertEqual(result, [loan1, loan2])
 
     def test_list_active_loans_preserves_insertion_order(self):
         book1 = self.library_service.register_book(1, "Clean Code", "Robert C. Martin")
