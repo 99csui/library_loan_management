@@ -7,7 +7,7 @@ class ConsoleMenu:
         self._library_service = library_service
         self._loan_service = loan_service
 
-    def run(self)  -> None:
+    def run(self) -> None:
         running = True
         while running:
             print(self._show_menu())
@@ -15,6 +15,8 @@ class ConsoleMenu:
             if get_option == "0":
                 running = False
                 print("Goodbye!")
+            elif get_option == "1":
+                self._register_book()
             
     def _show_menu(self) -> str:
         return (
@@ -30,3 +32,23 @@ class ConsoleMenu:
             "9. List active loans\n"
             "10. Find loans by member\n"
             "0. Exit")
+
+    def _register_book(self) -> None:
+        print("*** Register Book ***")
+
+        book_id_input = input("id: ").strip()
+
+        try:
+            book_id = int(book_id_input)
+        except ValueError:
+            print("id must be a number")
+            return
+        
+        title = input("title: ").strip()
+        author = input("author: ").strip()
+
+        try:
+            self._library_service.register_book(book_id, title, author)
+            print("Book registered successfully")
+        except (TypeError, ValueError) as error:
+            print(error)

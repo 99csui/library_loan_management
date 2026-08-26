@@ -10,6 +10,8 @@ from repositories.book_repository import BookRepository
 from repositories.member_repository import MemberRepository
 from repositories.loan_repository import LoanRepository
 
+from models.book import Book
+
 class TestConsoleMenu(unittest.TestCase):
     def setUp(self):
         self.book_repository = BookRepository()
@@ -39,3 +41,20 @@ class TestConsoleMenu(unittest.TestCase):
             self.console_menu.run()
         
             self.assertEqual(mocked_input.call_count, 2)
+
+    def test_run_registers_book_when_user_selects_register_book(self):
+        with patch("builtins.input", side_effect=["1", "1", "Clean Code", "Robert C. Martin", "0"]):
+            self.console_menu.run()
+
+            registered_book = self.book_repository.get_by_id(1)
+            self.assertIsNotNone(registered_book)
+            self.assertEqual(registered_book.id, 1)
+            self.assertEqual(registered_book.title, "Clean Code")
+            self.assertEqual(registered_book.author, "Robert C. Martin")
+
+    def test_register_book_does_not_store_book_when_id_input_is_invalid(self):
+        with patch("builtins.input", side_effect=["1", "abc", "0"]) as mocked_input:
+            self.console_menu.run()
+
+            self.assertEqual(mocked_input.call_count, 3)
+            self.assertEqual(self.book_repository.list_all(), [])
