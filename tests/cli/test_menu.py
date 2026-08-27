@@ -10,7 +10,6 @@ from repositories.book_repository import BookRepository
 from repositories.member_repository import MemberRepository
 from repositories.loan_repository import LoanRepository
 
-from models.book import Book
 
 class TestConsoleMenu(unittest.TestCase):
     def setUp(self):
@@ -58,3 +57,19 @@ class TestConsoleMenu(unittest.TestCase):
 
             self.assertEqual(mocked_input.call_count, 3)
             self.assertEqual(self.book_repository.list_all(), [])
+
+    def test_run_registers_member_when_user_selects_register_member(self):
+        with patch("builtins.input", side_effect=["2", "1", "Jose Osorio", "0"]) as mocked_input:
+            self.console_menu.run()            
+
+            registered_member = self.member_repository.get_by_id(1)
+            self.assertIsNotNone(registered_member)
+            self.assertEqual(registered_member.id, 1)
+            self.assertEqual(registered_member.name, "Jose Osorio")
+
+    def test_register_member_keeps_menu_running_when_input_is_invalid(self):
+        with patch("builtins.input", side_effect=["2", "abc", "0"]) as mocked_input:
+            self.console_menu.run()
+
+            self.assertEqual(mocked_input.call_count, 3)
+            self.assertEqual(self.member_repository.list_all(), [])

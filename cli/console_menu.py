@@ -15,9 +15,14 @@ class ConsoleMenu:
             if get_option == "0":
                 running = False
                 print("Goodbye!")
+
             elif get_option == "1":
                 self._register_book()
-            
+
+            elif get_option == "2":
+                self._register_member()
+
+                
     def _show_menu(self) -> str:
         return (
             "==== Library Loan Management ====\n"
@@ -52,3 +57,23 @@ class ConsoleMenu:
             print("Book registered successfully")
         except (TypeError, ValueError) as error:
             print(error)
+
+    def _register_member(self) -> None:
+        print("*** Register Member ***")
+
+        member_id_input = input("id: ").strip()
+
+        try:
+            member_id = int(member_id_input)
+        except ValueError:
+            print("id must be a number")
+            return
+
+        name = input("name: ").strip()
+
+        try:
+            self._library_service.register_member(member_id, name)
+            print("Member registered successfully")
+        except (TypeError, ValueError) as error:
+            print(error)
+
