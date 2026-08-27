@@ -22,7 +22,10 @@ class ConsoleMenu:
             elif get_option == "2":
                 self._register_member()
 
-                
+            elif get_option == "3":
+                self._remove_book()
+
+
     def _show_menu(self) -> str:
         return (
             "==== Library Loan Management ====\n"
@@ -77,3 +80,19 @@ class ConsoleMenu:
         except (TypeError, ValueError) as error:
             print(error)
 
+    def _remove_book(self) -> None:
+        print("*** Remove Book ***")
+
+        book_id_input = input("id: ").strip()
+
+        try:
+            book_id = int(book_id_input)
+        except ValueError:
+            print("id must be a number")
+            return
+
+        try:
+            self._library_service.remove_book(book_id)
+            print("Book removed successfully")
+        except (TypeError, ValueError) as error:
+            print(error)
