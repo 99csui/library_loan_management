@@ -25,6 +25,9 @@ class ConsoleMenu:
             elif get_option == "3":
                 self._remove_book()
 
+            elif get_option == "4":
+                self._remove_member()
+
 
     def _show_menu(self) -> str:
         return (
@@ -94,5 +97,22 @@ class ConsoleMenu:
         try:
             self._library_service.remove_book(book_id)
             print("Book removed successfully")
+        except (TypeError, ValueError) as error:
+            print(error)
+
+    def _remove_member(self) -> None:
+        print("*** Remove Member ***")
+        
+        member_id_input = input("id: ").strip()
+        
+        try:
+            member_id = int(member_id_input)
+        except ValueError:
+            print("id must be a number")
+            return
+        
+        try:
+            self._library_service.remove_member(member_id)
+            print("Member removed successfully")
         except (TypeError, ValueError) as error:
             print(error)

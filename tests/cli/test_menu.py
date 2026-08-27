@@ -90,3 +90,20 @@ class TestConsoleMenu(unittest.TestCase):
             self.assertEqual(mocked_input.call_count, 7)
             self.assertIsNotNone(remove_book)
             self.assertEqual(self.book_repository.list_all(), [remove_book])
+
+    def test_run_removes_member_when_user_selects_remove_member(self):
+        with patch("builtins.input", side_effect=["2", "1", "Ignacio Fuentes", "4", "1", "0"]):
+            self.console_menu.run()
+
+            remove_member = self.member_repository.get_by_id(1)
+            self.assertIsNone(remove_member)
+            self.assertEqual(self.member_repository.list_all(), [])
+
+    def test_remove_member_keeps_menu_running_when_input_is_invalid(self):
+        with patch("builtins.input", side_effect=["2", "1", "Ignacio Fuentes", "4", "abc", "0"]) as mocked_input:
+            self.console_menu.run()
+
+            remove_member = self.member_repository.get_by_id(1)
+            self.assertEqual(mocked_input.call_count, 6)
+            self.assertIsNotNone(remove_member)
+            self.assertEqual(self.member_repository.list_all(), [remove_member])
