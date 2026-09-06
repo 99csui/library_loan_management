@@ -107,3 +107,27 @@ class TestConsoleMenu(unittest.TestCase):
             self.assertEqual(mocked_input.call_count, 6)
             self.assertIsNotNone(remove_member)
             self.assertEqual(self.member_repository.list_all(), [remove_member])
+
+    def test_run_borrows_book_when_user_selects_borrow_book(self):
+        self.library_service.register_book(1, "Clean code", "Robert C. Martin")
+        self.library_service.register_member(1, "Harry Owen")
+
+        with patch("builtins.input", side_effect=["5", "1", "1", "1", "0"]):
+            self.console_menu.run()
+
+            added_loan = self.loan_repository.get_by_id(1)
+
+            self.assertIsNotNone(added_loan)
+            self.assertEqual(added_loan.book_id, 1)
+            self.assertEqual(added_loan.member_id, 1)
+            self.assertTrue(added_loan.is_active())
+
+    def test_borrow_book_keeps_menu_running_when_input_is_invalid(self):
+        self.library_service.register_book(1, "Clean code", "Robert C. Martin")
+        self.library_service.register_member(1, "Harry Owen")
+
+        with patch("builtins.input", side_effect=["5", "abc", "0"]) as mocked_input:
+            self.console_menu.run()
+
+            self.assertEqual(mocked_input.call_count, 3)
+            self.assertEqual(self.loan_repository.list_all(), [])

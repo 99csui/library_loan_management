@@ -28,6 +28,9 @@ class ConsoleMenu:
             elif get_option == "4":
                 self._remove_member()
 
+            elif get_option == "5":
+                self._borrow_book()
+
 
     def _show_menu(self) -> str:
         return (
@@ -47,12 +50,8 @@ class ConsoleMenu:
     def _register_book(self) -> None:
         print("*** Register Book ***")
 
-        book_id_input = input("id: ").strip()
-
-        try:
-            book_id = int(book_id_input)
-        except ValueError:
-            print("id must be a number")
+        book_id = self._read_id("id: ")
+        if book_id is None:
             return
         
         title = input("title: ").strip()
@@ -67,12 +66,8 @@ class ConsoleMenu:
     def _register_member(self) -> None:
         print("*** Register Member ***")
 
-        member_id_input = input("id: ").strip()
-
-        try:
-            member_id = int(member_id_input)
-        except ValueError:
-            print("id must be a number")
+        member_id = self._read_id("id: ")
+        if member_id is None:
             return
 
         name = input("name: ").strip()
@@ -86,12 +81,8 @@ class ConsoleMenu:
     def _remove_book(self) -> None:
         print("*** Remove Book ***")
 
-        book_id_input = input("id: ").strip()
-
-        try:
-            book_id = int(book_id_input)
-        except ValueError:
-            print("id must be a number")
+        book_id = self._read_id("id: ")
+        if book_id is None:
             return
 
         try:
@@ -103,12 +94,8 @@ class ConsoleMenu:
     def _remove_member(self) -> None:
         print("*** Remove Member ***")
         
-        member_id_input = input("id: ").strip()
-        
-        try:
-            member_id = int(member_id_input)
-        except ValueError:
-            print("id must be a number")
+        member_id = self._read_id("id: ")
+        if member_id is None:
             return
         
         try:
@@ -116,3 +103,32 @@ class ConsoleMenu:
             print("Member removed successfully")
         except (TypeError, ValueError) as error:
             print(error)
+
+    def _borrow_book(self):
+        print("*** Borrow Book ***")
+
+        loan_id = self._read_id("loan id: ")
+        if loan_id is None:
+            return
+        book_id = self._read_id("book id: ")
+        if book_id is None:
+            return
+        member_id = self._read_id("member id: ")
+        if member_id is None:
+            return
+
+        try:
+            self._loan_service.borrow_book(loan_id, book_id, member_id)
+            print("Loan added successfully")
+        except (TypeError, ValueError) as error:
+            print(error)
+
+    def _read_id(self, prompt: str) -> int | None:
+        input_prompt = input(prompt).strip()
+        try:
+            output_id = int(input_prompt)
+
+            return output_id
+        except ValueError:
+            print("id must be a number")
+            return None
