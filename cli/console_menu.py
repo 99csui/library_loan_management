@@ -31,6 +31,9 @@ class ConsoleMenu:
             elif get_option == "5":
                 self._borrow_book()
 
+            elif get_option == "6":
+                self._return_book()
+
 
     def _show_menu(self) -> str:
         return (
@@ -120,6 +123,19 @@ class ConsoleMenu:
         try:
             self._loan_service.borrow_book(loan_id, book_id, member_id)
             print("Loan added successfully")
+        except (TypeError, ValueError) as error:
+            print(error)
+
+    def _return_book(self) -> None:
+        print("*** Return Book ***")
+
+        loan_id = self._read_id("loan id: ")
+        if loan_id is None:
+            return
+
+        try:
+            self._loan_service.return_book(loan_id)
+            print("Book has been returned successfully")
         except (TypeError, ValueError) as error:
             print(error)
 
