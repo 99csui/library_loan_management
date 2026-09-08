@@ -168,3 +168,14 @@ class TestConsoleMenu(unittest.TestCase):
 
             mocked_input.assert_any_call("1 - Clean code - Robert C. Martin")
             mocked_input.assert_any_call("2 - Python Crash Course - Eric Matthes")
+
+    def test_run_lists_available_books_when_user_selects_list_available_books(self):
+        self.library_service.register_book(1, "Clean code", "Robert C. Martin")
+        self.library_service.register_book(2, "Python Crash Course", "Eric Matthes")
+        self.library_service.register_member(1, "Harry Owen")
+        self.loan_service.borrow_book(1, 1, 1)
+
+        with patch("builtins.input", side_effect=["8", "0"]), patch("builtins.print") as mocked_input:
+            self.console_menu.run()
+            
+            mocked_input.assert_any_call("2 - Python Crash Course - Eric Matthes")

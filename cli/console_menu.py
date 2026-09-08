@@ -148,6 +148,12 @@ class ConsoleMenu:
         for book in books:
             print(f"{book.id} - {book.title} - {book.author}")
 
+    def _list_available_books(self) -> None:
+        books = self._loan_service.list_available_books()
+
+        for book in books:
+            print(f"{book.id} - {book.title} - {book.author}")
+
     def _read_id(self, prompt: str) -> int | None:
         input_prompt = input(prompt).strip()
         try:
