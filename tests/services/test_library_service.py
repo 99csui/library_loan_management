@@ -162,3 +162,12 @@ class TestLibraryService(unittest.TestCase):
         self.service.remove_member(1)
 
         self.assertIsNone(self.member_repository.get_by_id(1))
+
+    def test_list_books_returns_all_registered_books(self):
+        book1 = self.service.register_book(1, "Clean Code", "Robert C. Martin")
+        book2 = self.service.register_book(2, "Python Crash Course", "Eric Matthes")
+
+        books = self.service.list_books()
+
+        self.assertEqual(len(books), 2)
+        self.assertEqual(books, [book1, book2])

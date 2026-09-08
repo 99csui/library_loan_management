@@ -157,3 +157,14 @@ class TestConsoleMenu(unittest.TestCase):
 
             self.assertEqual(mocked_input.call_count, 3)
             self.assertTrue(loan.is_active())
+
+    def test_run_lists_books_when_user_selects_list_books(self):
+        self.library_service.register_book(1, "Clean code", "Robert C. Martin")
+        self.library_service.register_book(2, "Python Crash Course", "Eric Matthes")
+
+        with patch("builtins.input", side_effect=["7", "0"]), patch("builtins.print") as mocked_input:
+
+            self.console_menu.run()
+
+            mocked_input.assert_any_call("1 - Clean code - Robert C. Martin")
+            mocked_input.assert_any_call("2 - Python Crash Course - Eric Matthes")

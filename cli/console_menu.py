@@ -34,6 +34,9 @@ class ConsoleMenu:
             elif get_option == "6":
                 self._return_book()
 
+            elif get_option == "7":
+                self._list_books()
+
 
     def _show_menu(self) -> str:
         return (
@@ -138,6 +141,12 @@ class ConsoleMenu:
             print("Book has been returned successfully")
         except (TypeError, ValueError) as error:
             print(error)
+
+    def _list_books(self) -> None:
+        books = self._library_service.list_books()
+
+        for book in books:
+            print(f"{book.id} - {book.title} - {book.author}")
 
     def _read_id(self, prompt: str) -> int | None:
         input_prompt = input(prompt).strip()
