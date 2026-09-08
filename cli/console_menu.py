@@ -37,6 +37,11 @@ class ConsoleMenu:
             elif get_option == "7":
                 self._list_books()
 
+            elif get_option == "8":
+                self._list_available_books()
+
+            elif get_option == "9":
+                self._list_active_loans()
 
     def _show_menu(self) -> str:
         return (
@@ -153,6 +158,12 @@ class ConsoleMenu:
 
         for book in books:
             print(f"{book.id} - {book.title} - {book.author}")
+
+    def _list_active_loans(self) -> None:
+        loans = self._loan_service.list_active_loans()
+
+        for loan in loans:
+            print(f"Loan {loan.id} - Book {loan.book_id} - Member {loan.member_id}")
 
     def _read_id(self, prompt: str) -> int | None:
         input_prompt = input(prompt).strip()

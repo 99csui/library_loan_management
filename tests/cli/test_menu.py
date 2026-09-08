@@ -1,5 +1,6 @@
 import unittest
 from unittest.mock import patch
+from unittest.mock import call
 
 from cli.console_menu import ConsoleMenu
 
@@ -179,3 +180,19 @@ class TestConsoleMenu(unittest.TestCase):
             self.console_menu.run()
             
             mocked_input.assert_any_call("2 - Python Crash Course - Eric Matthes")
+
+    def test_run_lists_active_loans_when_user_selects_list_active_loans(self):
+        self.library_service.register_book(1, "Clean code", "Robert C. Martin")
+        self.library_service.register_book(2, "Python Crash Course", "Eric Matthes")
+        self.library_service.register_member(1, "Harry Owen")
+        self.loan_service.borrow_book(1, 1, 1)
+        self.loan_service.borrow_book(2, 2, 1)
+        self.loan_service.return_book(1)
+
+        with patch("builtins.input", side_effect=["9", "0"]), patch("builtins.print") as mocked_print:
+            self.console_menu.run()
+                    
+            mocked_print.assert_any_call("Loan 2 - Book 2 - Member 1")
+            self.assertNotIn(
+                call("Loan 1 - Book 1 - Member 1"), mocked_print.call_args_list
+            )
