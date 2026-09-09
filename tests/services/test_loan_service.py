@@ -273,7 +273,7 @@ class TestLoanService(unittest.TestCase):
         self.service.return_book(loan1.id)
         result = self.service.list_active_loans()
 
-        self.assertEqual(result, [loan1, loan2])
+        self.assertEqual(result, [loan2])
 
     def test_list_active_loans_preserves_insertion_order(self):
         book1 = self.library_service.register_book(1, "Clean Code", "Robert C. Martin")
