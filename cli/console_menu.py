@@ -43,6 +43,9 @@ class ConsoleMenu:
             elif get_option == "9":
                 self._list_active_loans()
 
+            elif get_option == "10":
+                self._find_loans_by_member()
+
     def _show_menu(self) -> str:
         return (
             "==== Library Loan Management ====\n"
@@ -164,6 +167,21 @@ class ConsoleMenu:
 
         for loan in loans:
             print(f"Loan {loan.id} - Book {loan.book_id} - Member {loan.member_id}")
+
+    def _find_loans_by_member(self) -> None:
+        member_id = self._read_id("member id: ")
+        if member_id is None:
+            return
+
+        try:
+            loans = self._loan_service.find_loans_by_member(member_id)
+
+            for loan in loans:
+                print(f"Loan {loan.id} - Book {loan.book_id} - Member {loan.member_id}")
+
+        except (TypeError, ValueError) as error:
+            print(error)
+
 
     def _read_id(self, prompt: str) -> int | None:
         input_prompt = input(prompt).strip()

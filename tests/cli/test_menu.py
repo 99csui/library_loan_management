@@ -196,3 +196,36 @@ class TestConsoleMenu(unittest.TestCase):
             self.assertNotIn(
                 call("Loan 1 - Book 1 - Member 1"), mocked_print.call_args_list
             )
+
+    def test_run_finds_loans_by_member_when_user_selects_find_loans_by_member(self):
+        self.library_service.register_book(1, "Clean code", "Robert C. Martin")
+        self.library_service.register_book(2, "Python Crash Course", "Eric Matthes")
+        self.library_service.register_book(3, "The Lord of the Rings", "J. R. R. Tolkien")
+        self.library_service.register_book(4, "The Hobbit", "J. R. R. Tolkien")
+
+        self.library_service.register_member(1, "Harry Owen")
+        self.library_service.register_member(2, "Joel Fuentes")
+
+        self.loan_service.borrow_book(1, 1, 1)
+        self.loan_service.borrow_book(2, 2, 2)
+        self.loan_service.borrow_book(3, 3, 1)
+        self.loan_service.borrow_book(4, 4, 1)
+
+        with patch("builtins.input", side_effect=["10", "1", "0"]), patch("builtins.print") as mocked_print:
+            self.console_menu.run()
+
+            mocked_print.assert_any_call("Loan 1 - Book 1 - Member 1")
+            mocked_print.assert_any_call("Loan 3 - Book 3 - Member 1")
+            mocked_print.assert_any_call("Loan 4 - Book 4 - Member 1")
+
+            self.assertNotIn(call("Loan 2 - Book 2 - Member 2"), mocked_print.call_args_list)
+
+    def test_find_loans_by_member_keeps_menu_running_when_input_is_invalid(self):
+        self.library_service.register_book(1, "Clean code", "Robert C. Martin")
+        self.library_service.register_member(1, "Harry Owen")
+        self.loan_service.borrow_book(1, 1, 1)
+        
+        with patch("builtins.input", side_effect=["10", "abc", "0"]) as mocked_input:
+            self.console_menu.run()
+
+            self.assertEqual(mocked_input.call_count, 3)
