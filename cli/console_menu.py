@@ -46,6 +46,9 @@ class ConsoleMenu:
             elif get_option == "10":
                 self._find_loans_by_member()
 
+            else:
+                print("Invalid option")
+
     def _show_menu(self) -> str:
         return (
             "==== Library Loan Management ====\n"
@@ -118,7 +121,7 @@ class ConsoleMenu:
         except (TypeError, ValueError) as error:
             print(error)
 
-    def _borrow_book(self):
+    def _borrow_book(self) -> None:
         print("*** Borrow Book ***")
 
         loan_id = self._read_id("loan id: ")
@@ -184,10 +187,9 @@ class ConsoleMenu:
 
 
     def _read_id(self, prompt: str) -> int | None:
-        input_prompt = input(prompt).strip()
+        input_value = input(prompt).strip()
         try:
-            output_id = int(input_prompt)
-
+            output_id = int(input_value)
             return output_id
         except ValueError:
             print("id must be a number")
