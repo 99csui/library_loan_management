@@ -12,7 +12,6 @@ from models.book import Book
 from models.member import Member
 from models.loan import Loan
 from models.enums import LoanStatus
-datetime(2026, 7, 17, 15, 30)
 
 class TestLoanService(unittest.TestCase):
 

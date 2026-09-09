@@ -45,4 +45,6 @@ class LibraryService:
 
         result = self._member_repository.remove(member_id)        
         return result
-        
+
+    def list_books(self) -> list[Book]:
+        return self._book_repository.list_all()
